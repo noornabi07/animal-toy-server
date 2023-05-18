@@ -28,17 +28,21 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const toyCollection = client.db('toysDB').collection('allToys');
+    const toyCollection = client.db('toysDB').collection('addToys');
 
-    app.post('/allToys', async(req, res) =>{
+    app.post('/addToys', async(req, res) =>{
         const toys = req.body;
         const result = await toyCollection.insertOne(toys);
         res.send(result)
     })
 
-    app.get('/allToys', async(req, res) =>{
+    app.get('/allToys/:text', async(req, res) =>{
+        if(req.params.text == "teddy bear" || req.params.text === "hors" || req.params.text=="cat"){
+            const result = await toyCollection.find({subCategory: req.params.text}).toArray();
+            return res.send(result)
+        }
         const result = await toyCollection.find().toArray();
-        res.send(result)
+        res.send(result);
     })
 
     // Send a ping to confirm a successful connection
