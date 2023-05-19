@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express();
 const port = process.env.PORT || 5000;
@@ -8,9 +9,6 @@ const port = process.env.PORT || 5000;
 // middlware
 app.use(cors())
 app.use(express.json())
-
-
-
 
 const uri = `mongodb+srv://${process.env.DB_TOYS}:${process.env.DB_PASS}@cluster0.cnuoch3.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -36,17 +34,30 @@ async function run() {
         res.send(result)
     })
 
+    app.get('/allToys', async(req, res) =>{
+      const result = await toyCollection.find().toArray();
+      res.send(result);
+    })
+
     app.get('/allToys/:text', async(req, res) =>{
-        if(req.params.text == "teddy bear" || req.params.text === "hors" || req.params.text=="cat"){
-            const result = await toyCollection.find({subCategory: req.params.text}).toArray();
-            return res.send(result)
-        }
-        const result = await toyCollection.find().toArray();
-        res.send(result);
+      if(req.params.text == "teddy" || req.params.text == "cat" || req.params.text == "hors"){
+        const result = await toyCollection.find({subCategory: req.params.text}).toArray();
+        return res.send(result)
+      }
+
+      const result = await toyCollection.find({}).toArray();
+      res.send(result);
+
+    })
+
+    app.get('/allToys/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await toyCollection.findOne(query);
+      res.send(result)
     })
 
     app.get('/myToys/:email', async(req, res) =>{
-        console.log(req.params.email)
         const result = await toyCollection.find({email: req.params.email}).toArray();
         res.send(result);
     })
@@ -60,7 +71,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
 
 
 app.get('/', (req, res) =>{
