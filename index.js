@@ -36,6 +36,7 @@ async function run() {
 
     const result = await toyCollection.createIndex(indexKeys, indexOptions);
 
+    // find search by text
     app.get('/searchByToyName/:text', async (req, res) => {
       const searchText = req.params.text;
       const result = await toyCollection.find({
@@ -47,17 +48,21 @@ async function run() {
       res.send(result)
     })
 
+
+    // data added route
     app.post('/addToys', async (req, res) => {
       const toys = req.body;
       const result = await toyCollection.insertOne(toys);
       res.send(result)
     })
 
+    // all data get for read in ui
     app.get('/allToys', async (req, res) => {
       const result = await toyCollection.find().limit(limit).toArray();
       res.send(result);
     })
 
+      // get the data by category route
     app.get('/categoryToys/:text', async (req, res) => {
       if (req.params.text == "teddy" || req.params.text == "cat" || req.params.text == "hors") {
         const result = await toyCollection.find({ subCategory: req.params.text }).toArray();
@@ -69,6 +74,7 @@ async function run() {
       
     })
 
+    // get the data specific by id
     app.get('/allToys/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -77,6 +83,7 @@ async function run() {
       res.send(result)
     })
 
+    // update date make route by id
   app.put('/allToys/:id', async(req, res) =>{
     const id = req.params.id;
     const filter = {_id: new ObjectId(id)};
@@ -94,6 +101,7 @@ async function run() {
     res.send(result)
   })
 
+  // deleted route by id
     app.delete('/allToys/:id', async(req, res) =>{
       const id = req.params.id;
       const query = {_id: new ObjectId(id)};
@@ -101,6 +109,7 @@ async function run() {
       res.send(result);
     })
 
+    // find data by email
     app.get('/myToys/:email', async (req, res) => {
       const result = await toyCollection.find({ email: req.params.email }).sort(sort).toArray();
       res.send(result);
