@@ -28,38 +28,69 @@ async function run() {
 
     const toyCollection = client.db('toysDB').collection('addToys');
 
-    app.post('/addToys', async(req, res) =>{
-        const toys = req.body;
-        const result = await toyCollection.insertOne(toys);
-        res.send(result)
-    })
+    const sort = { length: -1 }
+    const limit = 20;
 
-    app.get('/allToys', async(req, res) =>{
-      const result = await toyCollection.find().toArray();
-      res.send(result);
-    })
+    const indexKeys = { toyName: 1, subCategory: 1 }
+    const indexOptions = { name: 'toyNameCategory' }
 
-    app.get('/allToys/:text', async(req, res) =>{
-      if(req.params.text == "teddy" || req.params.text == "cat" || req.params.text == "hors"){
-        const result = await toyCollection.find({subCategory: req.params.text}).toArray();
-        return res.send(result)
-      }
+    const result = await toyCollection.createIndex(indexKeys, indexOptions);
 
-      const result = await toyCollection.find({}).toArray();
-      res.send(result);
-
-    })
-
-    app.get('/allToys/:id', async(req, res) =>{
-      const id = req.params.id;
-      const query = {_id: new ObjectId(id)};
-      const result = await toyCollection.findOne(query);
+    app.get('/searchByToyName/:text', async (req, res) => {
+      const searchText = req.params.text;
+      const result = await toyCollection.find({
+        $or: [
+          { toyName: { $regex: searchText, $options: 'i' } },
+          { subCategory: { $regex: searchText, $options: 'i' } }
+        ],
+      }).toArray();
       res.send(result)
     })
 
-    app.get('/myToys/:email', async(req, res) =>{
-        const result = await toyCollection.find({email: req.params.email}).toArray();
+    app.post('/addToys', async (req, res) => {
+      const toys = req.body;
+      const result = await toyCollection.insertOne(toys);
+      res.send(result)
+    })
+
+    app.get('/allToys', async (req, res) => {
+      const result = await toyCollection.find().limit(limit).toArray();
+      res.send(result);
+    })
+
+    app.get('/categoryToys/:text', async (req, res) => {
+      if (req.params.text == "teddy" || req.params.text == "cat" || req.params.text == "hors") {
+        const result = await toyCollection.find({ subCategory: req.params.text }).toArray();
+        return res.send(result)
+      }
+      
+        const result = await toyCollection.find({}).toArray();
         res.send(result);
+      
+    })
+
+    app.get('/allToys/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await toyCollection.findOne(query);
+      console.log(result)
+      res.send(result)
+    })
+
+  app.patch('/updateToys/:id', async(req, res) =>{
+    const updateToys = req.body;
+  })
+
+    app.delete('/allToys/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await toyCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    app.get('/myToys/:email', async (req, res) => {
+      const result = await toyCollection.find({ email: req.params.email }).sort(sort).toArray();
+      res.send(result);
     })
 
     // Send a ping to confirm a successful connection
@@ -73,10 +104,10 @@ async function run() {
 run().catch(console.dir);
 
 
-app.get('/', (req, res) =>{
-    res.send('Animal Toys Shopping coming...')
+app.get('/', (req, res) => {
+  res.send('Animal Toys Shopping coming...')
 })
 
-app.listen(port, () =>{
-    console.log(`Animal toys shop run port is: ${port}`)
+app.listen(port, () => {
+  console.log(`Animal toys shop run port is: ${port}`)
 })
