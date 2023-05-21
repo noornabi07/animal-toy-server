@@ -110,7 +110,7 @@ async function run() {
 
     // find data by email running
     app.get('/myToys/:email', async (req, res) => {
-      const result = await toyCollection.find({ email: req.params.email }).sort(sort).toArray();
+      const result = await toyCollection.find({ email: req.params.email }).toArray();
       res.send(result);
     })
 
