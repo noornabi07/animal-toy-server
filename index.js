@@ -28,7 +28,7 @@ async function run() {
 
     const toyCollection = client.db('toysDB').collection('addToys');
 
-    const sort = { length: -1 }
+    // const sort = { length: -1 }
     const limit = 20;
 
     const indexKeys = { toyName: 1, subCategory: 1 }
@@ -41,8 +41,8 @@ async function run() {
       const searchText = req.params.text;
       const result = await toyCollection.find({
         $or: [
-          { toyName: { $regex: searchText, $options: 'i' } },
-          { subCategory: { $regex: searchText, $options: 'i' } }
+          { toyName: searchText},
+          { subCategory:searchText}
         ],
       }).toArray();
       res.send(result)
@@ -108,7 +108,7 @@ async function run() {
       res.send(result);
     })
 
-    // find data by email
+    // find data by email running
     app.get('/myToys/:email', async (req, res) => {
       const result = await toyCollection.find({ email: req.params.email }).sort(sort).toArray();
       res.send(result);
