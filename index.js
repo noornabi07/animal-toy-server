@@ -30,6 +30,7 @@ async function run() {
 
     // const sort = { length: -1 }
     const limit = 20;
+  
 
     const indexKeys = { toyName: 1, subCategory: 1 }
     const indexOptions = { name: 'toyNameCategory' }
@@ -110,7 +111,8 @@ async function run() {
 
     // find data by email running
     app.get('/myToys/:email', async (req, res) => {
-      const result = await toyCollection.find({ email: req.params.email }).toArray();
+      const sort = req?.query?.sort === true? 1 : -1;
+      const result = await toyCollection.find({ email: req.params.email }).sort({price: sort}).toArray();
       res.send(result);
     })
 
